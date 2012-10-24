@@ -1,0 +1,77 @@
+
+# Set environment variables to the Hadoop installation, and version.
+# For me, this is:
+
+setenv HADOOPH /home/SAIL/sthomas/sthomas/projects/hadoop/hadoop-1.0.3/
+setenv HADOOPV 1.0.3
+
+
+# Compile the jar 
+mkdir build
+
+javac -classpath \
+${HADOOPH}/hadoop-core-${HADOOPV}.jar:${HADOOPH}/lib/commons-cli-1.2.jar \
+-d build src/*.java
+
+jar -cvf countngrams.jar -C build/ .
+
+
+### STANDALONE MODE (on local machine, with regular file system)
+
+# Put input files in fs/input
+
+# Remove fs/output if it's already there
+rm -r fs/output
+
+${HADOOPH}/bin/hadoop --config conf-standalone jar ./countngrams.jar \
+ca.queensu.sail.doofuslarge.CountNGrams \
+fs/inputsmall fs/outputsmall 1,2,3,4,5
+
+# The output will be fs/output
+
+# Sort the output file using the sort command; 
+# -n is numeric; -r is reverse; -k2 means 2nd column
+cat fs/output/part-r-00000 | sort -nrk 2 > all.out
+
+
+
+ 
+### PSEUDO-DISTRIBUTED MODE
+
+## Create and populate the HDFS file system, if you don't already have one
+## running.
+
+# Format and populate HDFS directories:
+${HADOOPH}/bin/hadoop namenode -format
+
+# Populate the filesytem:
+
+${HADOOPH}/bin/hadoop fs -mkdir /tmp/hadoop-sthomas/input
+
+# Now, put some files into the input directory. In my case, I've written an
+# external script to do this. 
+
+#${HADOOPH}/bin/hadoop fs -put fs/input/file02 /tmp/hadoop-sthomas/input
+
+cd ..
+./copyFiles.sh ../bl/data/mozilla_mailnews/data/A1.B3.C0/2004-01-01/bugs
+cd CountNGrams
+
+# Check the filesystem
+${HADOOPH}/bin/hadoop fs -ls /tmp/hadoop-sthomas
+
+# Run the hadoop job, first removing output directories if they exist
+${HADOOPH}/bin/hadoop fs -rmr /tmp/hadoop-sthomas/output
+rm localfile
+
+${HADOOPH}/bin/hadoop --config conf-pseudo jar ./countngrams.jar \
+ca.queensu.sail.doofuslarge.CountNGrams \
+/tmp/hadoop-sthomas/input /tmp/hadoop-sthomas/output 1,2
+
+# Get output
+
+${HADOOPH}/bin/hadoop fs -get /tmp/hadoop-sthomas/output/part-r-00000 localfile
+cat localfile
+
+
+
