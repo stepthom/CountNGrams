@@ -1,0 +1,13 @@
+imap
+save
+as
+draft
+does
+not
+save
+the
+message
+if
+uri
+contains
+space
