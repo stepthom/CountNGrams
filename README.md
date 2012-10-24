@@ -13,13 +13,13 @@ AUTHOR
 DESCRIPTION
 -----------
 
-This class uses Hadoop to count the number of occurances of n-grams in a given
+This class uses Hadoop to count the number of occurrences of n-grams in a given
 set of text files.
 
 An n-gram is a list of n words, which are adjacent to each other in a text file. 
 For example, if the text file contained the text "one two three", there would be
-three 3 1-grams ("one", "two", "three"), 2 2-grams ("one_two", "two_three"), and
-1 3-gram ("one_two_three").
+three 1-grams ("one", "two", "three"), two 2-grams ("one_two", "two_three"), and
+one 3-gram ("one_two_three").
 
 This class has been tested against hadoop 1.0.3. 
 
